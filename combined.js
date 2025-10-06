@@ -21,25 +21,20 @@ async function loadData() {
   renderTable(filteredData, headers);
 }
 
-// Expand ranges like "1-3" => ["1", "2", "3"]
-function expandRanges(values) {
-  const expanded = new Set();
-  values.forEach(value => {
-    if (!value) return;
-    const parts = value.split(/[-–]/).map(p => p.trim());
-    if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
-      const start = parseInt(parts[0], 10);
-      const end = parseInt(parts[1], 10);
-      for (let i = start; i <= end; i++) expanded.add(i.toString());
-    } else {
-      expanded.add(value);
-    }
-  });
-  return Array.from(expanded).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+
+function expandNumericRange(value) {
+  if (!value) return [];
+  const parts = value.split(/[-–]/).map(p => p.trim());
+  if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+    const start = parseInt(parts[0], 10);
+    const end = parseInt(parts[1], 10);
+    return Array.from({ length: end - start + 1 }, (_, i) => (start + i).toString());
+  }
+  return [value];
 }
 
 // Populate all dropdowns
-function populateDropdowns(currentData) {
+function populateDropdowns() {
   const dropdownMap = {
     'volumeSearch': 'Volume',
     'fascicoloSearch': 'Fascicolo',
@@ -53,7 +48,7 @@ function populateDropdowns(currentData) {
   };
 
   for (const [id, field] of Object.entries(dropdownMap)) {
-    const rawValues = currentData.map(row => row[field]).filter(v => v && v !== '?');
+    const rawValues = data.map(row => row[field]).filter(v => v && v !== '?'); // use full data
     const values = expandRanges(rawValues);
     const dropdown = document.getElementById(id);
     if (dropdown) {
