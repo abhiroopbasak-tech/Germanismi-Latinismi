@@ -48,12 +48,30 @@ function populateDropdowns() {
   };
 
   for (const [id, field] of Object.entries(dropdownMap)) {
-    const rawValues = data.map(row => row[field]).filter(v => v && v !== '?'); // use full data
-    const values = expandRanges(rawValues);
+    // Get all non-empty, non-"?" values
+    const rawValues = data
+      .map(row => row[field])
+      .filter(v => v && v !== '?');
+
+    // Expand numeric ranges
+    const expandedValues = rawValues.flatMap(v => expandNumericRange(v));
+
+    // Remove duplicates and sort naturally
+    const uniqueValues = [...new Set(expandedValues)]
+      .map(v => v.trim())
+      .filter(v => v !== '')
+      .sort((a, b) => {
+        const numA = parseFloat(a), numB = parseFloat(b);
+        if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
+        return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
+      });
+
+    // Fill dropdown
     const dropdown = document.getElementById(id);
     if (dropdown) {
-      dropdown.innerHTML = '<option value="">-- Any --</option>' +
-        values.map(v => `<option value="${v}">${v}</option>`).join('');
+      dropdown.innerHTML =
+        '<option value="">-- Any --</option>' +
+        uniqueValues.map(v => `<option value="${v}">${v}</option>`).join('');
     }
   }
 }
