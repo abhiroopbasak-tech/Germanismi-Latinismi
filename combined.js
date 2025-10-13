@@ -56,6 +56,7 @@ function populateDropdowns() {
     // Expand numeric ranges
     const expandedValues = rawValues.flatMap(v => expandNumericRange(v));
 
+    
     // Remove duplicates and sort naturally
     const uniqueValues = [...new Set(expandedValues)]
       .map(v => v.trim())
