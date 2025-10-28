@@ -2,6 +2,7 @@ let data = [];
 let headers = [];
 let filteredData = [];
 
+
 async function loadData() {
   const response = await fetch('combined.tsv');
   const text = await response.text();
